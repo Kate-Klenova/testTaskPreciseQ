@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using NUnit.Framework;
+using System;
 
 namespace TestTask_PreciseQ.Tests
 {
@@ -14,6 +15,7 @@ namespace TestTask_PreciseQ.Tests
         {
             _driver = new ChromeDriver();
             _driver.Manage().Window.Maximize();
+            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
             landingPageService = new LandingPageService(_driver);
         }
 
