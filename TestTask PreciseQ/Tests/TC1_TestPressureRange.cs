@@ -22,14 +22,14 @@ namespace TestTask_PreciseQ.Tests
         [TestCase]
         public void TestPressureRange()
         {
-            string testDay = "Воскресенье";
-            string testPlace = "Драгобрат";
+            var testDay = "Воскресенье";
+            var testPlace = "Драгобрат";
 
             _driver.Navigate().GoToUrl("https://sinoptik.ua/");
             landingPageService.SearchForCity(testPlace);
             landingPageService.ClickTab(testDay);
             landingPageService.CheckTabIsOpened(testDay);
-            Assert.IsTrue(landingPageService.VerifyPressureInRange(600,700));
+            Assert.IsTrue(landingPageService.VerifyPressureInRange(700,800));
         }
 
         [TearDown]

@@ -1,13 +1,18 @@
 ﻿using OpenQA.Selenium;
 using NUnit.Framework;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using OpenQA.Selenium.Support.UI;
 
 namespace TestTask_PreciseQ.Tests
 {
     public class LandingPageService
     {
-        IWebDriver _driver;
+        private readonly IWebDriver _driver;
+        private readonly By _searchInput = By.Id("search_city");
+        private readonly By _infoDay = By.XPath("//p[@class = 'infoDayweek']");
+        private readonly By _dayPressures = By.XPath("//*[@id='bd6c']/div[1]/div[2]/table/tbody/tr[5]/td");
 
         public LandingPageService(IWebDriver driver)
         {
@@ -16,46 +21,34 @@ namespace TestTask_PreciseQ.Tests
 
         public void SearchForCity(string city)
         {
-            IWebElement searchInput = _driver.FindElement(By.Id("search_city"));
+            var searchInput = _driver.FindElement(_searchInput);
             searchInput.SendKeys(city);
         }
 
         public void ClickTab(string tabTiltle)
         {
-            IWebElement sundayTab = _driver.FindElement(By.XPath("//a[text() = 'Воскресенье']"));
+            var sundayTab = _driver.FindElement(By.XPath("//a[text() = '" + tabTiltle + "' ]"));
             sundayTab.Click();
         }
 
         public bool CheckTabIsOpened(string expectedText) {
-            WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
-            IWebElement sundayTabInfo = wait.Until(d => d.FindElement(By.XPath("//p[@class = 'infoDayweek']")));
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
+            var sundayTabInfo = wait.Until(d => d.FindElement(_infoDay));
             Assert.IsTrue(expectedText == sundayTabInfo.Text);
             return true; 
         }
 
         public bool VerifyPressureInRange(int minValue, int maxValue)
-        {   
-            string nightPressure = _driver.FindElement(By.XPath("//tr[@class = 'gray']/td[@class = 'p1 bR '] [1]")).Text;
-            int nightPressureInt = Convert.ToInt32(nightPressure);
-            string morningPressure = _driver.FindElement(By.XPath("//tr[@class = 'gray']/td[@class = 'p2 bR ' and @colspan = '2'] [1]")).Text;
-            int morningPressureInt = Convert.ToInt32(morningPressure);
-            string dayPressure = _driver.FindElement(By.XPath("//tr[@class = 'gray']/td[@class = 'p3 bR '] [1]")).Text;
-            int dayPressureInt = Convert.ToInt32(dayPressure);
-            string eveningPressure = _driver.FindElement(By.XPath("//tr[@class = 'gray']/td[@class = 'p4  '] [1]")).Text;
-            int eveningPressureInt = Convert.ToInt32(eveningPressure);
-            try
+        {
+            IList <IWebElement> dayPressureRanges = _driver.FindElements(_dayPressures);
+            int count = dayPressureRanges.Count;
+            for (int i = 0; i < count; i++)
             {
-                Assert.IsTrue(nightPressureInt >= minValue && nightPressureInt <= maxValue);
-                Assert.IsTrue(morningPressureInt >= minValue && morningPressureInt <= maxValue);
-                Assert.IsTrue(dayPressureInt >= minValue && dayPressureInt <= maxValue);
-                Assert.IsTrue(eveningPressureInt >= minValue && eveningPressureInt <= maxValue);
+                if (Convert.ToInt32(dayPressureRanges[i].Text) < minValue ||
+                    Convert.ToInt32(dayPressureRanges[i].Text) > maxValue)
+                    return false;
             }
-            catch (AssertionException e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
-            return true;
+         return true;
         }
     }
 }
